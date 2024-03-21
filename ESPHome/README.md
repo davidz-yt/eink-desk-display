@@ -1,0 +1,1 @@
+YAML and image graphics
