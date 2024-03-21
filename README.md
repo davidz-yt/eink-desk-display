@@ -17,7 +17,7 @@ This E-ink display has ESPHome installed and retrieves all live data (timesync, 
 
 
 # Hardware
-- LilyGo T5 4.7" Epaper (Old Version, NOT New V2.3)
+- LilyGo T5 4.7" Epaper ([Old Version Used](https://www.lilygo.cc/en-ca/products/t5-4-7-inch-e-paper), NOT New V2.3)
 - Remixed 3D Printed Case based on this [3D Model](https://www.printables.com/model/272575-case-for-lilygo-t5-47-inch-e-paper)
 
 
