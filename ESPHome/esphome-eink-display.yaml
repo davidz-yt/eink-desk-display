@@ -1,0 +1,477 @@
+substitutions:
+  esp_name: ESP Display #Device Name
+  esp_hostname: esphome-einkt5 
+
+esphome:
+  name: ${esp_hostname}
+  platform: ESP32
+  board: esp32dev
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: "...REPLACE_KEY..."
+
+ota:
+  password: "...REPLACE_PASSWORD..."
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+captive_portal:
+
+time:
+  - platform: homeassistant
+    id: ntp
+    on_time:
+      - seconds: 0
+        then:
+          - component.update: t5_display
+
+spi:
+  clk_pin: 18
+  mosi_pin: 23 
+
+button:
+  - platform: restart
+    name: "${esp_name} Restart"
+
+  - platform: template
+    name: "${esp_name} Refresh"
+    icon: "mdi:update"
+
+  - platform: template
+    name: "${esp_name} Next Page"
+    icon: "mdi:update"
+    on_press:
+      then:
+      - display.page.show_next: t5_display
+      - component.update: t5_display
+
+binary_sensor:
+  - platform: gpio
+    pin: 
+      number: GPIO39
+      inverted: true
+    name: "${esp_name} Button 1"
+    on_press:
+      then:
+      - display.page.show_next: t5_display
+      - component.update: t5_display
+
+
+sensor:
+  - platform: homeassistant
+    entity_id: sensor.openweathermap_feels_like_temperature
+    id: feel_temp
+    internal: true
+
+  - platform: homeassistant
+    entity_id: sensor.openweathermap_forecast_precipitation_probability
+    id: prec_perc
+    internal: true
+
+  - platform: homeassistant
+    entity_id: input_number.usbswitchcontroller_current_output
+    id: usb_output
+    internal: true
+    on_value: 
+      then:
+        - component.update: t5_display
+
+  - platform: homeassistant
+    entity_id: input_number.lgtv_hdmi_output
+    id: hdmi_output
+    internal: true
+    on_value: 
+      then:
+        - component.update: t5_display
+
+  - platform: homeassistant
+    entity_id: sensor.homepc_amd_ryzen_5_5600x_temperatures_core_tctl_tdie
+    id: hw_cpu_temp
+    internal: true
+  
+  - platform: homeassistant
+    entity_id: sensor.homepc_amd_ryzen_5_5600x_load_cpu_total
+    id: hw_cpu_load
+    internal: true
+    
+  - platform: homeassistant
+    entity_id: sensor.homepc_amd_radeon_rx_6800_xt_temperatures_gpu_core
+    id: hw_gpu_temp
+    internal: true
+
+  - platform: homeassistant
+    entity_id: sensor.homepc_amd_radeon_rx_6800_xt_load_gpu_core
+    id: hw_gpu_load
+    internal: true
+
+  - platform: homeassistant
+    entity_id: sensor.homepc_generic_memory_load_memory
+    id: hw_mem_load
+    internal: true
+
+  - platform: homeassistant
+    entity_id: sensor.homepc_generic_memory_data_memory_used
+    id: hw_mem_usage
+    internal: true
+
+  - platform: homeassistant
+    entity_id: sensor.yahoofinance_xeqt_to
+    id: stock1_price
+    internal: true
+
+  - platform: homeassistant
+    entity_id: sensor.yahoofinance_xeqt_to
+    attribute: regularMarketDayHigh
+    id: stock1_high
+    internal: true
+
+  - platform: homeassistant
+    entity_id: sensor.yahoofinance_xeqt_to
+    attribute: regularMarketDayLow
+    id: stock1_low
+    internal: true
+
+  - platform: homeassistant
+    entity_id: sensor.yahoofinance_gspc
+    id: stock2_price
+    internal: true
+
+  - platform: homeassistant
+    entity_id: sensor.yahoofinance_gspc
+    attribute: regularMarketDayHigh
+    id: stock2_high
+    internal: true
+
+  - platform: homeassistant
+    entity_id: sensor.yahoofinance_gspc
+    attribute: regularMarketDayLow
+    id: stock2_low
+    internal: true
+
+  - platform: homeassistant
+    entity_id: sensor.yahoofinance_gsptse
+    id: stock3_price
+    internal: true
+
+  - platform: homeassistant
+    entity_id: sensor.yahoofinance_gsptse
+    attribute: regularMarketDayHigh
+    id: stock3_high
+    internal: true
+
+  - platform: homeassistant
+    entity_id: sensor.yahoofinance_gsptse
+    attribute: regularMarketDayLow
+    id: stock3_low
+    internal: true
+
+  - platform: homeassistant
+    entity_id: sensor.yahoofinance_cad_x
+    id: currency_USDCAD
+    internal: true
+
+
+text_sensor:
+# More (Text Based) Weather Sensors
+  - platform: homeassistant
+    entity_id: sensor.openweathermap_precipitation_kind
+    id: fc_prec
+    internal: true
+
+  - platform: homeassistant
+    entity_id: sensor.openweathermap_forecast_condition
+    id: fc_weather
+    internal: true
+
+  - platform: homeassistant
+    entity_id: sensor.yahoofinance_xeqt_to
+    attribute: trending
+    id: stock1_trending
+    internal: true
+
+  - platform: homeassistant
+    entity_id: sensor.yahoofinance_gspc
+    attribute: trending
+    id: stock2_trending
+    internal: true
+
+  - platform: homeassistant
+    entity_id: sensor.yahoofinance_gsptse
+    attribute: trending
+    id: stock3_trending
+    internal: true
+
+# NOTE: Make sure these images fit the screen resolution. I was encountering crashes when the image extended beyond the edge of the screen.
+image:
+  - file: "images/main_background.png"
+    id: bg_image
+  - file: "images/Page2_bg.png"
+    id: page2_bg_image
+  - file: "images/HDMI1.png"
+    id: hdmi1_image
+  - file: "images/HDMI2.png"
+    id: hdmi2_image
+  - file: "images/HDMI3.png"
+    id: hdmi3_image
+  - file: "images/HDMI4.png"
+    id: hdmi4_image
+  - file: "images/USB1.png"
+    id: usb1_image
+  - file: "images/USB2.png"
+    id: usb2_image
+  - file: "images/USB3.png"
+    id: usb3_image
+  - file: "images/USB4.png"
+    id: usb4_image
+  
+
+font:
+  - file: "fonts/GoogleSans-Medium.ttf"
+    id: font_date
+    size: 58   
+  - file: "fonts/GoogleSans-Bold.ttf"
+    id: font_time
+    size: 105
+  - file: "fonts/GoogleSans-Bold.ttf"
+    id: font_value
+    size: 50
+  - file: "fonts/GoogleSans-Bold.ttf"
+    id: font_value_small
+    size: 40
+  - file: "fonts/GoogleSans-Bold.ttf"
+    id: font_stock_title
+    size: 40
+  - file: "fonts/GoogleSans-Bold.ttf"
+    id: font_stock_price
+    size: 60
+  - file: "fonts/GoogleSans-Bold.ttf"
+    id: font_stock_price_small
+    size: 50
+  - file: "fonts/GoogleSans-Medium.ttf"
+    id: font_stock_highlow
+    size: 30
+
+  # https://pictogrammers.github.io/@mdi/font/5.3.45/
+  - file: 'fonts/materialdesignicons-webfont.ttf'
+    id: font_icons
+    size: 130
+    glyphs:
+        - "\U000F0594" # clear-night
+        - "\U000F0590" # cloudy
+        - "\U000F0595" # partlycloudy
+        - "\U000F0591" # fog      
+        - "\U000F0592" # hail
+        - "\U000F0593" # lightning
+        - "\U000F067E" # lightning-rainy
+        - "\U000F0596" # pouring
+        - "\U000F0597" # rainy
+        - "\U000F0F36" # snowy
+        - "\U000F067F" # snowy-rainy
+        - "\U000F0599" # sunny
+        - "\U000F059D" # windy
+        - "\U000F059E" # windy-variant
+        - "\U000F0F38" # exceptional
+        
+  - file: 'fonts/materialdesignicons-webfont.ttf'
+    id: font_icons_small
+    size: 56
+    glyphs:
+        - "\U000F050F" # Temperature
+        - "\U000F07E4" # CO2
+        - "\U000F054B" # umbrella      
+        - "\U000F0592" # hail
+        - "\U000F0593" # lightning
+        - "\U000F067E" # lightning-rainy
+        - "\U000F0597" # rainy
+        - "\U000F0F36" # snowy
+        - "\U000F0594" # clear-night
+        - "\U000F0599" # sunny
+        - "\U000F059D" # wind
+        - "\U000F058E" # humidity
+        - "\U000F0D43" # air filter
+        - "\U000F0533" # trending down
+        - "\U000F0534" # trending neutral
+        - "\U000F0535" # trending up
+
+color:
+  - id: white
+    white: 100%
+
+
+external_components:
+  - source: github://madimadi/esphome-lilygo-t5-47@lilygo-t5-47
+    components: ["lilygo_t5_47"]
+
+display:
+  - platform: lilygo_t5_47
+    id: t5_display
+    rotation: 90
+    update_interval: 3600s
+    full_update_every: 5 # optional (default:  1): 0 - never, 1 (default) - every, 2+ - throttled    
+    pages:
+      - id: page1
+        lambda: |-
+          #define xres 540
+          #define yres 960
+
+          it.image(0, 0, id(bg_image));
+          
+          it.strftime(xres/2, 10, id(font_date), TextAlign::TOP_CENTER, "%A %b %d ", id(ntp).now());
+          it.strftime(xres/2, 80, id(font_time), TextAlign::TOP_CENTER, "%I:%M %p ", id(ntp).now());
+                
+
+          // Weather Icon
+          #define weather_icon_x 122
+          #define weather_icon_y 316
+          //Weather forecast Icon
+          if (id(fc_weather).state == "clear-night") {
+          it.printf(weather_icon_x, weather_icon_y, id(font_icons), TextAlign::CENTER, "\U000F0594");}
+          if (id(fc_weather).state == "cloudy") {
+          it.printf(weather_icon_x, weather_icon_y, id(font_icons), TextAlign::CENTER, "\U000F0590");}
+          if (id(fc_weather).state == "partlycloudy") {
+          it.printf(weather_icon_x, weather_icon_y, id(font_icons), TextAlign::CENTER, "\U000F0595");}
+          if (id(fc_weather).state == "fog") {
+          it.printf(weather_icon_x, weather_icon_y, id(font_icons), TextAlign::CENTER, "\U000F0591");}
+          if (id(fc_weather).state == "hail") {
+          it.printf(weather_icon_x, weather_icon_y, id(font_icons), TextAlign::CENTER, "\U000F0592");}
+          if (id(fc_weather).state == "lightning") {
+          it.printf(weather_icon_x, weather_icon_y, id(font_icons), TextAlign::CENTER, "\U000F0593");}
+          if (id(fc_weather).state == "lightning-rainy") {
+          it.printf(weather_icon_x, weather_icon_y, id(font_icons), TextAlign::CENTER, "\U000F067E");}
+          if (id(fc_weather).state == "pouring") {
+          it.printf(weather_icon_x, weather_icon_y, id(font_icons), TextAlign::CENTER, "\U000F0596");}
+          if (id(fc_weather).state == "rainy") {
+          it.printf(weather_icon_x, weather_icon_y, id(font_icons), TextAlign::CENTER, "\U000F0597");}
+          if (id(fc_weather).state == "snowy") {
+          it.printf(weather_icon_x, weather_icon_y, id(font_icons), TextAlign::CENTER, "\U000F0F36");}
+          if (id(fc_weather).state == "snowy-rainy") {
+          it.printf(weather_icon_x, weather_icon_y, id(font_icons), TextAlign::CENTER, "\U000F067F");}
+          if (id(fc_weather).state == "sunny") {
+          it.printf(weather_icon_x, weather_icon_y, id(font_icons), TextAlign::CENTER, "\U000F0599");}
+          if (id(fc_weather).state == "windy") {
+          it.printf(weather_icon_x, weather_icon_y, id(font_icons), TextAlign::CENTER, "\U000F059D");}
+          if (id(fc_weather).state == "windy-variant") {
+          it.printf(weather_icon_x, weather_icon_y, id(font_icons), TextAlign::CENTER, "\U000F059E");}
+          if (id(fc_weather).state == "exceptional") {
+          it.printf(weather_icon_x, weather_icon_y, id(font_icons), TextAlign::CENTER, "\U000F0F38");} 
+
+
+          // Feels Like Temp
+          #define temp_icon_y 285
+          it.printf(290, temp_icon_y, id(font_icons_small), TextAlign::CENTER, "\U000F050F"); // temperature
+          it.printf(409, temp_icon_y, id(font_value), TextAlign::CENTER, "%.1f°C", id(feel_temp).state);
+          
+          // Input + HDMI Selection
+          #define input_icon_x 0
+          #define input_icon_y 428
+          if (id(hdmi_output).state == 1) {
+          it.image(input_icon_x, input_icon_y, id(hdmi1_image));}
+          if (id(hdmi_output).state == 2) {
+          it.image(input_icon_x, input_icon_y, id(hdmi2_image));}
+          if (id(hdmi_output).state == 3) {
+          it.image(input_icon_x, input_icon_y, id(hdmi3_image));}
+          if (id(hdmi_output).state == 4) {
+          it.image(input_icon_x, input_icon_y, id(hdmi4_image));}
+
+          // USB Selection
+          #define usb_icon_x 232
+          #define usb_icon_y 523
+          if (id(usb_output).state == 1) {
+          it.image(usb_icon_x, usb_icon_y, id(usb1_image));}
+          if (id(usb_output).state == 2) {
+          it.image(usb_icon_x, usb_icon_y, id(usb2_image));}
+          if (id(usb_output).state == 3) {
+          it.image(usb_icon_x, usb_icon_y, id(usb3_image));}
+          if (id(usb_output).state == 4) {
+          it.image(usb_icon_x, usb_icon_y, id(usb4_image));}
+
+
+          // Precipitation
+          #define prec_icon_x 290
+          #define prec_icon_y 349
+          if (id(fc_prec).state == "None") {
+          it.printf(prec_icon_x, prec_icon_y, id(font_icons_small), TextAlign::CENTER, "\U000F054B");}
+          if (id(fc_prec).state == "Hail") {
+          it.printf(prec_icon_x, prec_icon_y, id(font_icons_small), TextAlign::CENTER, "\U000F0592");}
+          if (id(fc_prec).state == "Rain") {
+          it.printf(prec_icon_x, prec_icon_y, id(font_icons_small), TextAlign::CENTER, "\U000F0597");}
+          if (id(fc_prec).state == "Snow") {
+          it.printf(prec_icon_x, prec_icon_y, id(font_icons_small), TextAlign::CENTER, "\U000F0F36");}
+
+          it.printf(409, prec_icon_y, id(font_value), TextAlign::CENTER, "%3.0f %%", id(prec_perc).state);
+
+          // Hardware Sensors
+          it.printf(342, 679, id(font_value_small), TextAlign::CENTER, "%1.0f%%  %.1f°C", id(hw_cpu_load).state, id(hw_cpu_temp).state );
+          it.filled_rectangle(36, 710, id(hw_cpu_load).state*4.67, 16);
+
+          it.printf(342, 779, id(font_value_small), TextAlign::CENTER, "%1.0f%%  %.1f°C", id(hw_gpu_load).state, id(hw_gpu_temp).state );
+          it.filled_rectangle(36, 810, id(hw_gpu_load).state*4.67, 16);
+
+          it.printf(342, 879, id(font_value_small), TextAlign::CENTER, "%1.0f%%  %.1fGB", id(hw_mem_load).state, id(hw_mem_usage).state );
+          it.filled_rectangle(36, 910, id(hw_mem_load).state*4.67, 16);
+
+      - id: page2
+        lambda: |-
+          #define xres 540
+          #define yres 960
+
+          it.image(0, 0, id(page2_bg_image));
+          
+          it.strftime(xres/2, 10, id(font_date), TextAlign::TOP_CENTER, "%A %b %d ", id(ntp).now());
+          it.strftime(xres/2, 80, id(font_time), TextAlign::TOP_CENTER, "%I:%M %p ", id(ntp).now());
+
+          // Stock 1
+          it.print(272, 251, id(font_stock_title), id(white), TextAlign::CENTER, "XEQT" );
+          it.printf(262, 336, id(font_stock_price), TextAlign::CENTER_RIGHT, "%1.2f", id(stock1_price).state );
+          it.printf(376, 318, id(font_stock_highlow), TextAlign::CENTER_LEFT, "%1.2f", id(stock1_high).state );
+          it.printf(376, 355, id(font_stock_highlow), TextAlign::CENTER_LEFT, "%1.2f", id(stock1_low).state );
+          
+          #define stock1_trending_x 305
+          #define stock1_trending_y 336
+          if (id(stock1_trending).state == "up") {
+          it.printf(stock1_trending_x, stock1_trending_y, id(font_icons_small), TextAlign::CENTER, "\U000F0535");}
+          if (id(stock1_trending).state == "neutral") {
+          it.printf(stock1_trending_x, stock1_trending_y, id(font_icons_small), TextAlign::CENTER, "\U000F0534");}
+          if (id(stock1_trending).state == "down") {
+          it.printf(stock1_trending_x, stock1_trending_y, id(font_icons_small), TextAlign::CENTER, "\U000F0533");}
+
+          // Stock 2
+          it.print(272, 457, id(font_stock_title), id(white), TextAlign::CENTER, "S+P 500" );
+          it.printf(262, 543, id(font_stock_price), TextAlign::CENTER_RIGHT, "%1.2f", id(stock2_price).state );
+          it.printf(376, 525, id(font_stock_highlow), TextAlign::CENTER_LEFT, "%1.2f", id(stock2_high).state );
+          it.printf(376, 562, id(font_stock_highlow), TextAlign::CENTER_LEFT, "%1.2f", id(stock2_low).state );
+          
+          #define stock2_trending_x 305
+          #define stock2_trending_y 543
+          if (id(stock2_trending).state == "up") {
+          it.printf(stock2_trending_x, stock2_trending_y, id(font_icons_small), TextAlign::CENTER, "\U000F0535");}
+          if (id(stock2_trending).state == "neutral") {
+          it.printf(stock2_trending_x, stock2_trending_y, id(font_icons_small), TextAlign::CENTER, "\U000F0534");}
+          if (id(stock2_trending).state == "down") {
+          it.printf(stock2_trending_x, stock2_trending_y, id(font_icons_small), TextAlign::CENTER, "\U000F0533");}
+
+          // Stock 3
+          it.print(272, 663, id(font_stock_title), id(white), TextAlign::CENTER, "S+P TSX" );
+          it.printf(262, 752, id(font_stock_price_small), TextAlign::CENTER_RIGHT, "%1.2f", id(stock3_price).state );
+          it.printf(376, 734, id(font_stock_highlow), TextAlign::CENTER_LEFT, "%1.2f", id(stock3_high).state );
+          it.printf(376, 770, id(font_stock_highlow), TextAlign::CENTER_LEFT, "%1.2f", id(stock3_low).state );
+          
+          #define stock3_trending_x 305
+          #define stock3_trending_y 752
+          if (id(stock3_trending).state == "up") {
+          it.printf(stock3_trending_x, stock3_trending_y, id(font_icons_small), TextAlign::CENTER, "\U000F0535");}
+          if (id(stock3_trending).state == "neutral") {
+          it.printf(stock3_trending_x, stock3_trending_y, id(font_icons_small), TextAlign::CENTER, "\U000F0534");}
+          if (id(stock3_trending).state == "down") {
+          it.printf(stock3_trending_x, stock3_trending_y, id(font_icons_small), TextAlign::CENTER, "\U000F0533");}
+
+          // Currency
+          it.print(272, 865, id(font_stock_title), id(white), TextAlign::CENTER, "USD CAD" );
+          it.printf(xres/2, 912, id(font_stock_highlow), TextAlign::CENTER, "%1.3f", id(currency_USDCAD).state );
